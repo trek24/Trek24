@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trek24 – Vehicle Tracking</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --red: #e02020;
+    --red-light: rgba(224,32,32,0.12);
+    --black: #0d0d0d;
+    --black2: #161616;
+    --card: #1e1e1e;
+    --text: #f5f5f5;
+    --muted: #999;
+    --border: rgba(255,255,255,0.08);
+    --wa: #25d366;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--black); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+  header { width: 100%; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--black2); position: sticky; top: 0; z-index: 10; }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; color: #fff; display: flex; align-items: center; gap: 2px; }
+  .logo-pin { width: 9px; height: 9px; background: var(--red); border-radius: 50% 50% 50% 0; transform: rotate(-45deg); margin-right: 6px; flex-shrink: 0; }
+  .logo span { color: var(--red); }
+  .header-badge { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+  .online-dot { width: 6px; height: 6px; background: #4caf50; border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  main { width: 100%; max-width: 480px; padding: 0 0 48px; display: flex; flex-direction: column; align-items: center; }
+  .hero { text-align: center; padding: 26px 24px 16px; width: 100%; }
+  .hero-tag { display: inline-flex; align-items: center; gap: 6px; background: var(--red-light); border: 1px solid rgba(224,32,32,0.3); color: #ff7070; font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px; }
+  .hero h1 { font-family: 'Syne', sans-serif; font-size: 25px; font-weight: 800; line-height: 1.25; color: #fff; margin-bottom: 10px; }
+  .hero h1 span { color: var(--red); }
+  .hero p { font-size: 13.5px; color: var(--muted); line-height: 1.65; max-width: 320px; margin: 0 auto; }
+  .trust-strip { display: flex; justify-content: center; gap: 14px; margin-top: 14px; flex-wrap: wrap; }
+  .trust-item { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+  .check { color: var(--red); }
+  .delivery-banner { width: calc(100% - 32px); margin: 4px 16px 14px; background: var(--red-light); border: 1px solid rgba(224,32,32,0.22); border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: #ff9090; }
+  .chat-container { width: 100%; padding: 0 16px; }
+  .chat-box { background: var(--black2); border: 1px solid var(--border); border-radius: 16px; padding: 16px; min-height: 300px; max-height: 460px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; }
+  .chat-box::-webkit-scrollbar { width: 3px; }
+  .chat-box::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+  .msg { max-width: 86%; padding: 11px 14px; font-size: 13.5px; line-height: 1.6; white-space: pre-wrap; animation: fadeUp 0.22s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+  .msg.bot { background: var(--card); border: 1px solid var(--border); color: var(--text); align-self: flex-start; border-radius: 4px 14px 14px 14px; }
+  .msg.user { background: var(--red); color: #fff; align-self: flex-end; border-radius: 14px 4px 14px 14px; }
+  .typing { display: flex; gap: 5px; align-items: center; padding: 12px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 4px 14px 14px 14px; align-self: flex-start; width: fit-content; animation: fadeUp 0.22s ease; }
+  .typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: blink 1.2s infinite; }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,60%,100%{transform:translateY(0);opacity:0.4} 30%{transform:translateY(-5px);opacity:1} }
+  .bottom-area { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; padding: 0 2px; }
+  .opts-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .opt { font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 14px; border-radius: 20px; border: 1px solid rgba(224,32,32,0.4); background: transparent; color: #ff7070; cursor: pointer; transition: all 0.15s; }
+  .opt:hover { background: var(--red-light); border-color: var(--red); }
+  .back-btn { font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; align-self: flex-start; display: flex; align-items: center; gap: 5px; }
+  .back-btn:hover { border-color: var(--muted); color: var(--text); }
+  .input-wrap { display: flex; gap: 8px; width: 100%; }
+  .chat-input { flex: 1; background: var(--card); border: 1px solid rgba(224,32,32,0.3); border-radius: 12px; padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 13.5px; color: var(--text); outline: none; }
+  .chat-input::placeholder { color: var(--muted); }
+  .chat-input:focus { border-color: var(--red); }
+  .input-submit { background: var(--red); color: #fff; border: none; border-radius: 12px; padding: 11px 18px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .input-submit:hover { background: #b01818; }
+  .wa-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; background: var(--wa); color: #fff; border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.15s; animation: fadeUp 0.3s ease; }
+  .wa-btn:hover { background: #20c05a; }
+  .divider { width: 36px; height: 2px; background: var(--red); margin: 14px auto 0; border-radius: 2px; }
+  footer { margin-top: 28px; padding: 0 24px; text-align: center; font-size: 11.5px; color: var(--muted); line-height: 1.8; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><div class="logo-pin"></div>TREK<span>24</span></div>
+  <div class="header-badge"><div class="online-dot"></div>Online now</div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="hero-tag">📍 Zimbabwe &amp; South Africa — Nationwide</div>
+    <h1>Protect your vehicle.<br/><span>Pay once. Own it forever.</span></h1>
+    <p>Real-time GPS tracking with no monthly fees. We deliver and install anywhere, nationwide.</p>
+    <div class="trust-strip">
+      <div class="trust-item"><span class="check">✓</span> Once-off payment</div>
+      <div class="trust-item"><span class="check">✓</span> No monthly fees</div>
+      <div class="trust-item"><span class="check">✓</span> Nationwide delivery</div>
+    </div>
+    <div class="divider"></div>
+  </div>
+
+  <div class="delivery-banner">
+    <span style="font-size:18px;">🚚</span>
+    <div><strong style="color:#fff;">We come to you — anywhere.</strong> Nationwide delivery &amp; installation across Zimbabwe and South Africa.</div>
+  </div>
+
+  <div class="chat-container">
+    <div class="chat-box" id="chat-box"></div>
+    <div class="bottom-area" id="bottom-area"></div>
+  </div>
+</main>
+
+<footer>
+  Trek24 · GPS Vehicle Tracking<br/>
+  Zimbabwe &amp; South Africa · Nationwide Delivery<br/>
+  WhatsApp: +263 77 559 4799
+</footer>
+
+<script>
+const WA_NUMBER = '263775594799';
+const box = document.getElementById('chat-box');
+const bottomArea = document.getElementById('bottom-area');
+
+// ── STATE ─────────────────────────────────────────────────
+const lead = { type:'', country:'', package:'', packageLabel:'', fleetSize:'', location:'', availability:'' };
+
+// History stack for back button — each entry is a function that re-renders that step
+const history = [];
+
+// ── CORE HELPERS ──────────────────────────────────────────
+function addMsg(text, type) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + type;
+  d.textContent = text;
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+}
+
+function clearBottom() { bottomArea.innerHTML = ''; }
+
+function doTyping(delay, cb) {
+  clearBottom();
+  const t = document.createElement('div');
+  t.className = 'typing';
+  t.innerHTML = '<span></span><span></span><span></span>';
+  box.appendChild(t);
+  box.scrollTop = box.scrollHeight;
+  setTimeout(() => { t.remove(); cb(); }, delay);
+}
+
+// Render options with optional back button
+// backFn: function to call when back is pressed (null = no back button)
+function renderOpts(opts, onSelect, backFn) {
+  clearBottom();
+  if (backFn) {
+    const backBtn = document.createElement('button');
+    backBtn.className = 'back-btn';
+    backBtn.innerHTML = '← Back';
+    backBtn.onclick = () => { clearBottom(); backFn(); };
+    bottomArea.appendChild(backBtn);
+  }
+  const row = document.createElement('div');
+  row.className = 'opts-row';
+  opts.forEach(opt => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.textContent = opt;
+    b.onclick = () => {
+      clearBottom();
+      addMsg(opt, 'user');
+      onSelect(opt);
+    };
+    row.appendChild(b);
+  });
+  bottomArea.appendChild(row);
+}
+
+function renderTextInput(placeholder, backFn, onSubmit) {
+  clearBottom();
+  if (backFn) {
+    const backBtn = document.createElement('button');
+    backBtn.className = 'back-btn';
+    backBtn.innerHTML = '← Back';
+    backBtn.onclick = () => { clearBottom(); backFn(); };
+    bottomArea.appendChild(backBtn);
+  }
+  const wrap = document.createElement('div');
+  wrap.className = 'input-wrap';
+  const input = document.createElement('input');
+  input.className = 'chat-input';
+  input.placeholder = placeholder;
+  input.type = 'text';
+  const btn = document.createElement('button');
+  btn.className = 'input-submit';
+  btn.textContent = 'Confirm';
+  function submit() {
+    const val = input.value.trim();
+    if (!val) { input.focus(); return; }
+    clearBottom();
+    addMsg(val, 'user');
+    onSubmit(val);
+  }
+  btn.onclick = submit;
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+  wrap.appendChild(input);
+  wrap.appendChild(btn);
+  bottomArea.appendChild(wrap);
+  setTimeout(() => input.focus(), 100);
+}
+
+function renderWAButton() {
+  clearBottom();
+  const btn = document.createElement('button');
+  btn.className = 'wa-btn';
+  btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg> WhatsApp Trek24 Now`;
+  btn.onclick = () => {
+    let parts = ['Hi Trek24!'];
+    if (lead.packageLabel) parts.push(`I am interested in the ${lead.packageLabel}.`);
+    else if (lead.fleetSize) parts.push(`I have a fleet of ${lead.fleetSize} vehicles and need tracking.`);
+    else parts.push('I am interested in your vehicle tracking packages.');
+    if (lead.fleetSize && lead.packageLabel) parts.push(`Fleet size: ${lead.fleetSize} vehicles.`);
+    if (lead.country) parts.push(`Country: ${lead.country === 'ZW' ? 'Zimbabwe' : 'South Africa'}.`);
+    if (lead.location) parts.push(`Location: ${lead.location}.`);
+    if (lead.availability) parts.push(`Available for installation: ${lead.availability}.`);
+    parts.push('Please help me book. Thank you!');
+    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(parts.join(' '))}`, '_blank');
+  };
+  bottomArea.appendChild(btn);
+}
+
+// ── BOOKING FLOW ──────────────────────────────────────────
+function stepAvailability(backFn) {
+  doTyping(800, () => {
+    addMsg("When are you available for installation? 📅\n\nPick an option or type a specific date/time.", 'bot');
+    const opts = ["Today", "Tomorrow", "This weekend", "Next week", "I'll specify a date"];
+    renderOpts(opts, (opt) => {
+      if (opt === "I'll specify a date") {
+        doTyping(700, () => {
+          addMsg("Type your preferred date and time below.", 'bot');
+          renderTextInput('e.g. Saturday 10am, 15 April...', () => stepAvailability(backFn), (val) => {
+            lead.availability = val;
+            stepFinal();
+          });
+        });
+      } else {
+        lead.availability = opt;
+        stepFinal();
+      }
+    }, backFn);
+  });
+}
+
+function stepLocation(backFn) {
+  doTyping(800, () => {
+    addMsg("Almost done! 📍 Where are you located?\n(e.g. Harare, Bulawayo, Cape Town, Johannesburg — any area works)", 'bot');
+    renderTextInput('Type your city or area...', backFn, (val) => {
+      lead.location = val;
+      doTyping(700, () => {
+        addMsg(`Got it — ${val}! We cover that area. 🚗`, 'bot');
+        stepAvailability(() => stepLocation(backFn));
+      });
+    });
+  });
+}
+
+function stepFinal() {
+  doTyping(900, () => {
+    addMsg("You're all set! 🎉\n\nTap the button below — your package, location and availability are already filled in. Our team will confirm your slot fast.", 'bot');
+    renderWAButton();
+  });
+}
+
+// ── PACKAGE CONTENT ───────────────────────────────────────
+const packages = {
+  ZW: {
+    lite: {
+      label: 'Trek-Lite Zimbabwe ($65 once-off)',
+      text: "🔹 Trek-Lite — $65 once-off (Zimbabwe)\n\n✓ Real-time vehicle tracking\n✓ 24/7 access to vehicle location\n✓ Trip history for 1 month\n✓ Mobile app — connect up to 3 devices simultaneously\n✓ Fast & easy installation\n✓ No contracts, no monthly fees\n✓ Nationwide delivery & installation"
+    },
+    standard: {
+      label: 'Trek-Standard Zimbabwe ($75 once-off)',
+      text: "🔸 Trek-Standard — $75 once-off (Zimbabwe)\n\n✓ Everything in Trek-Lite PLUS:\n✓ Remote engine cut-off — stop your car remotely if stolen\n✓ Trip history for 6 months\n✓ Speeding alerts\n✓ 24/7 WhatsApp support\n✓ Mobile app — connect up to 5 devices simultaneously\n✓ 50% money back if we fail to recover your vehicle\n✓ 6-month tracker guarantee (free repair or replacement)\n✓ Nationwide delivery & installation\n\nIdeal for personal cars and small fleets."
+    },
+    premium: {
+      label: 'Trek-Premium Zimbabwe ($100 once-off)',
+      text: "⭐ Trek-Premium — $100 once-off (Zimbabwe)\n\n✓ Everything in Standard PLUS:\n✓ Instant movement alerts via SMS or app\n✓ Theft prevention alerts & notifications\n✓ Voice monitoring\n✓ SAZ Tracker Certificate\n✓ Panic button\n✓ Driver behaviour monitoring (speeding, harsh braking)\n✓ Vehicle recovery assistance\n✓ Mobile app — unlimited devices connected\n✓ 100% money back if we fail to recover your vehicle\n✓ Nationwide delivery & installation\n\nThe complete package. Best for big fleet management."
+    }
+  },
+  SA: {
+    lite: {
+      label: 'Trek-Lite South Africa (R1,200 once-off)',
+      text: "🔹 Trek-Lite — R1,200 once-off (South Africa)\n\n✓ Real-time vehicle tracking\n✓ 24/7 access to vehicle location\n✓ Trip history for 1 month\n✓ Mobile app — connect up to 3 devices simultaneously\n✓ Fast & easy installation\n✓ No contracts, no monthly fees\n✓ Nationwide delivery & installation"
+    },
+    standard: {
+      label: 'Trek-Standard South Africa (R1,600 once-off)',
+      text: "🔸 Trek-Standard — R1,600 once-off (South Africa)\n\n✓ Everything in Trek-Lite PLUS:\n✓ Remote engine cut-off — stop your car remotely if stolen\n✓ Trip history for 6 months\n✓ Speeding alerts\n✓ 24/7 WhatsApp support\n✓ Mobile app — connect up to 5 devices simultaneously\n✓ 50% money back if we fail to recover your vehicle\n✓ 6-month tracker guarantee (free repair or replacement)\n✓ Nationwide delivery & installation\n\nIdeal for personal cars and small fleets."
+    },
+    premium: {
+      label: 'Trek-Premium South Africa (R2,500 once-off)',
+      text: "⭐ Trek-Premium — R2,500 once-off (South Africa)\n\n✓ Everything in Standard PLUS:\n✓ Camera + tracker combo\n✓ Instant movement alerts via SMS or app\n✓ Theft prevention alerts & notifications\n✓ Voice monitoring\n✓ Panic button\n✓ Driver behaviour monitoring (speeding, harsh braking)\n✓ Vehicle recovery assistance\n✓ Mobile app — unlimited devices connected\n✓ 100% money back if we fail to recover your vehicle\n✓ Nationwide delivery & installation\n\n⏳ Tracker Certification — Coming Soon\n\nThe complete package for ultimate peace of mind."
+    }
+  }
+};
+
+function showPackage(tier, backFn) {
+  const c = lead.country;
+  const pkg = packages[c][tier];
+  lead.package = tier;
+  lead.packageLabel = pkg.label;
+  doTyping(900, () => {
+    addMsg(pkg.text, 'bot');
+    const others = ['lite','standard','premium'].filter(t => t !== tier);
+    const otherLabels = {
+      lite: c === 'ZW' ? 'See Trek-Lite ($65)' : 'See Trek-Lite (R1,200)',
+      standard: c === 'ZW' ? 'See Trek-Standard ($75)' : 'See Trek-Standard (R1,600)',
+      premium: c === 'ZW' ? 'See Trek-Premium ($100)' : 'See Trek-Premium (R2,500)'
+    };
+    renderOpts(
+      ["I want this one", otherLabels[others[0]], otherLabels[others[1]]],
+      (opt) => {
+        if (opt === "I want this one") { stepLocation(() => showPackage(tier, backFn)); return; }
+        if (opt.includes('Lite')) showPackage('lite', backFn);
+        else if (opt.includes('Standard')) showPackage('standard', backFn);
+        else if (opt.includes('Premium')) showPackage('premium', backFn);
+      },
+      backFn
+    );
+  });
+}
+
+function showAllPackages(backFn) {
+  const c = lead.country;
+  const isZW = c === 'ZW';
+  doTyping(900, () => {
+    addMsg(isZW
+      ? "Here are the packages for Zimbabwe:\n\n🔹 Trek-Lite — $65\nReal-time tracking + 3 devices on app\n\n🔸 Trek-Standard — $75\nEverything in Lite + engine cut-off + 6-month history + speeding alerts + 5 devices on app + 50% money-back + 6-month warranty\n\n⭐ Trek-Premium — $100\nAll Standard + SMS alerts + voice monitoring + SAZ certificate + panic button + driver behaviour + vehicle recovery + unlimited devices + 100% money-back\n\nAll once-off. No subscriptions."
+      : "Here are the packages for South Africa:\n\n🔹 Trek-Lite — R1,200\nReal-time tracking + 3 devices on app\n\n🔸 Trek-Standard — R1,600\nEverything in Lite + engine cut-off + 6-month history + speeding alerts + 5 devices on app + 50% money-back + 6-month warranty\n\n⭐ Trek-Premium — R2,500\nAll Standard + camera & tracker combo + SMS alerts + voice monitoring + panic button + driver behaviour + vehicle recovery + unlimited devices + 100% money-back\n⏳ Tracker Certification — Coming Soon\n\nAll once-off. No subscriptions.",
+      'bot'
+    );
+    const opts = isZW
+      ? ["Trek-Lite ($65)", "Trek-Standard ($75)", "Trek-Premium ($100)", "More questions"]
+      : ["Trek-Lite (R1,200)", "Trek-Standard (R1,600)", "Trek-Premium (R2,500)", "More questions"];
+    renderOpts(opts, (opt) => {
+      if (opt.includes('Lite')) showPackage('lite', () => showAllPackages(backFn));
+      else if (opt.includes('Standard')) showPackage('standard', () => showAllPackages(backFn));
+      else if (opt.includes('Premium')) showPackage('premium', () => showAllPackages(backFn));
+      else showMoreQuestions(() => showAllPackages(backFn));
+    }, backFn);
+  });
+}
+
+// ── COUNTRY SELECT ────────────────────────────────────────
+function stepCountry(backFn, onSelect) {
+  doTyping(800, () => {
+    addMsg("Are you based in Zimbabwe or South Africa? 🌍\n\nThis helps me show you the right prices.", 'bot');
+    renderOpts(["🇿🇼 Zimbabwe", "🇿🇦 South Africa"], (opt) => {
+      lead.country = opt.includes('Zimbabwe') ? 'ZW' : 'SA';
+      onSelect(lead.country);
+    }, backFn);
+  });
+}
+
+// ── MORE QUESTIONS ────────────────────────────────────────
+function showMoreQuestions(backFn) {
+  doTyping(700, () => {
+    addMsg("What would you like to know?", 'bot');
+    renderOpts(
+      ["How long is installation?", "Where do you operate?", "Do you come to me?", "Is there a warranty?", "Show packages"],
+      (opt) => {
+        if (opt === "How long is installation?") {
+          doTyping(800, () => {
+            addMsg("Installation takes about 30 minutes. Our technician comes to you — home, office, or wherever is most convenient.", 'bot');
+            renderOpts(["Book now", "Show packages"], (o) => {
+              if (o === "Book now") stepLocation(() => showMoreQuestions(backFn));
+              else showAllPackages(() => showMoreQuestions(backFn));
+            }, () => showMoreQuestions(backFn));
+          });
+        } else if (opt === "Where do you operate?") {
+          doTyping(800, () => {
+            addMsg("We operate nationwide across Zimbabwe and South Africa.\n\nOur main base is at NetOne Building, Harare CBD — but we come to you wherever you are.", 'bot');
+            renderOpts(["Book now", "Show packages"], (o) => {
+              if (o === "Book now") stepLocation(() => showMoreQuestions(backFn));
+              else showAllPackages(() => showMoreQuestions(backFn));
+            }, () => showMoreQuestions(backFn));
+          });
+        } else if (opt === "Do you come to me?") {
+          doTyping(800, () => {
+            addMsg("Yes — we always come to you! Anywhere in Zimbabwe or South Africa.\n\nJust share your location and we'll arrange a convenient time.", 'bot');
+            renderOpts(["Book now", "Show packages"], (o) => {
+              if (o === "Book now") stepLocation(() => showMoreQuestions(backFn));
+              else showAllPackages(() => showMoreQuestions(backFn));
+            }, () => showMoreQuestions(backFn));
+          });
+        } else if (opt === "Is there a warranty?") {
+          doTyping(800, () => {
+            addMsg("Trek-Standard: 6-month tracker guarantee (free repair or replacement) + 50% money-back if we fail to recover your vehicle.\n\nTrek-Premium: 100% money-back if we fail to recover your vehicle.", 'bot');
+            renderOpts(["Book now", "Show packages"], (o) => {
+              if (o === "Book now") stepLocation(() => showMoreQuestions(backFn));
+              else showAllPackages(() => showMoreQuestions(backFn));
+            }, () => showMoreQuestions(backFn));
+          });
+        } else {
+          showAllPackages(backFn);
+        }
+      },
+      backFn
+    );
+  });
+}
+
+// ── FLEET FLOW ────────────────────────────────────────────
+function stepFleet(backFn) {
+  doTyping(900, () => {
+    addMsg("Perfect — fleet tracking is where we really shine. One app, all your vehicles live on a map.\n\nHow many vehicles are you looking to track?", 'bot');
+    renderOpts(["2–5 vehicles", "6–10 vehicles", "More than 10 vehicles"], (opt) => {
+      lead.fleetSize = opt === "2–5 vehicles" ? '2–5' : opt === "6–10 vehicles" ? '6–10' : '10+';
+      if (lead.fleetSize === '10+') {
+        doTyping(800, () => {
+          addMsg("For fleets over 10 vehicles we put together a custom proposal with the best pricing.\n\nLet's connect directly so we can tailor everything to your operation.", 'bot');
+          stepLocation(() => stepFleet(backFn));
+        });
+      } else {
+        doTyping(800, () => {
+          addMsg(`For ${lead.fleetSize} vehicles, Trek-Standard or Trek-Premium works great. One dashboard, all vehicles live. Want to see the packages?`, 'bot');
+          renderOpts(["Yes, show me packages", "Book directly"], (o) => {
+            if (o === "Yes, show me packages") showAllPackages(() => stepFleet(backFn));
+            else stepLocation(() => stepFleet(backFn));
+          }, () => stepFleet(backFn));
+        });
+      }
+    }, backFn);
+  });
+}
+
+// ── ENTRY POINT ───────────────────────────────────────────
+function start() {
+  doTyping(800, () => {
+    addMsg("Hey! Welcome to Trek24 👋\n\nWe install GPS trackers on your vehicle — once-off payment, zero monthly fees. We deliver and install nationwide across Zimbabwe and South Africa.\n\nWhat are you looking for today?", 'bot');
+    renderOpts(
+      ["Track my personal car", "Track my fleet / business vehicles", "See all packages & prices", "How does it work?"],
+      (opt) => {
+        lead.type = opt.includes('fleet') ? 'fleet' : 'personal';
+        if (opt === "How does it work?") {
+          doTyping(900, () => {
+            addMsg("It's simple:\n\n1️⃣ Choose your package\n2️⃣ Tell us your location and availability\n3️⃣ We come to you — anywhere in Zimbabwe or South Africa\n4️⃣ Installation takes about 30 minutes\n5️⃣ Download the app, see your vehicle live\n\nNo monthly payments. No contracts. Ever.", 'bot');
+            renderOpts(["See packages", "Book installation now"], (o) => {
+              if (o === "Book installation now") stepCountry(start, () => stepLocation(start));
+              else stepCountry(start, (c) => showAllPackages(start));
+            }, start);
+          });
+          return;
+        }
+        stepCountry(start, (c) => {
+          if (opt.includes('fleet')) stepFleet(start);
+          else if (opt.includes('packages')) showAllPackages(start);
+          else {
+            doTyping(800, () => {
+              addMsg("Smart move — vehicle theft is real and we can help.\n\nHere are the packages for " + (c === 'ZW' ? 'Zimbabwe' : 'South Africa') + ":", 'bot');
+              showAllPackages(start);
+            });
+          }
+        });
+      },
+      null
+    );
+  });
+}
+
+start();
+</script>
+</body>
+</html>
