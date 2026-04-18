@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Trek24 — GPS Vehicle Tracking</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --red:#D91C1C;--red-dark:#B01515;--red-light:#FEF0F0;--red-mid:rgba(217,28,28,0.12);
+  --black:#111111;--grey:#F7F6F3;--grey2:#EFEFED;--grey3:#E2E1DE;
+  --white:#FFFFFF;--text:#1A1A1A;--muted:#777;--muted2:#999;--border:#E5E4E0;--wa:#25D366;
+}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--text);overflow-x:hidden;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 48px;height:68px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'Archivo Black',sans-serif;font-size:22px;letter-spacing:-0.5px;color:var(--black);}
+.nav-logo span{color:var(--red);}
+.nav-links{display:flex;gap:32px;align-items:center;}
+.nav-links a{font-size:13px;color:var(--muted);text-decoration:none;font-weight:500;transition:color 0.2s;}
+.nav-links a:hover{color:var(--black);}
+.nav-cta{background:var(--red)!important;color:#fff!important;padding:10px 22px;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-radius:2px;}
+
+.hero{min-height:100vh;display:grid;grid-template-columns:55% 45%;padding-top:68px;overflow:hidden;}
+.hero-left{display:flex;flex-direction:column;justify-content:center;padding:80px 64px;background:var(--white);position:relative;}
+.hero-left::after{content:'';position:absolute;right:0;top:10%;bottom:10%;width:1px;background:var(--border);}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;margin-bottom:24px;}
+.hero-eyebrow-dot{width:8px;height:8px;background:var(--red);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.8);}}
+.hero-eyebrow-text{font-size:11px;font-weight:600;color:var(--red);letter-spacing:2.5px;text-transform:uppercase;}
+h1.hero-h1{font-family:'Archivo Black',sans-serif;font-size:clamp(52px,5.5vw,80px);line-height:1.0;letter-spacing:-2px;color:var(--black);margin-bottom:20px;}
+h1.hero-h1 span{color:var(--red);}
+.hero-sub{font-size:16px;color:var(--muted);line-height:1.75;max-width:460px;margin-bottom:40px;}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-bottom:44px;border:1px solid var(--border);}
+.stat{padding:20px;border-right:1px solid var(--border);}
+.stat:last-child{border-right:none;}
+.stat-num{font-family:'Archivo Black',sans-serif;font-size:32px;color:var(--red);line-height:1;letter-spacing:-1px;}
+.stat-label{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
+.hero-btns{display:flex;gap:12px;}
+.btn-primary{background:var(--red);color:#fff;padding:16px 32px;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;border:none;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;border-radius:2px;}
+.btn-primary:hover{background:var(--red-dark);}
+.btn-outline{background:transparent;color:var(--black);padding:16px 32px;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;border:1.5px solid var(--border);cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;border-radius:2px;}
+.btn-outline:hover{border-color:var(--black);}
+.hero-right{position:relative;overflow:hidden;background:var(--grey);}
+.hero-right img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+.hero-right::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(to top,rgba(247,246,243,0.6),transparent);pointer-events:none;}
+.hero-badge{position:absolute;bottom:36px;right:28px;background:var(--white);border:1px solid var(--border);padding:14px 18px;box-shadow:0 4px 24px rgba(0,0,0,0.08);}
+.hero-badge-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;}
+.hero-badge-value{font-family:'Archivo Black',sans-serif;font-size:18px;color:var(--red);letter-spacing:-0.5px;}
+
+.trust-bar{background:var(--black);padding:16px 48px;display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap;}
+.trust-item{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.7);white-space:nowrap;}
+.trust-item span{color:var(--red);}
+.trust-sep{width:1px;height:16px;background:rgba(255,255,255,0.15);}
+
+.section{padding:96px 64px;}
+.section-grey{background:var(--grey);}
+.section-tag{font-family:'Space Mono',monospace;font-size:10px;color:var(--red);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;}
+.section-title{font-family:'Archivo Black',sans-serif;font-size:clamp(36px,4vw,56px);letter-spacing:-1.5px;line-height:1.05;margin-bottom:14px;color:var(--black);}
+.section-title span{color:var(--red);}
+.section-sub{font-size:15px;color:var(--muted);line-height:1.75;max-width:520px;margin-bottom:56px;}
+
+.country-toggle{display:flex;gap:0;margin-bottom:44px;border:1.5px solid var(--border);width:fit-content;overflow:hidden;border-radius:2px;}
+.country-btn{padding:12px 28px;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:transparent;color:var(--muted);border:none;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;}
+.country-btn.active{background:var(--red);color:#fff;}
+
+.packages-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);}
+.pkg-card{background:var(--white);padding:36px 28px;position:relative;cursor:pointer;transition:all 0.25s;text-decoration:none;color:inherit;display:block;border:2px solid transparent;}
+.pkg-card:hover{border-color:var(--red);z-index:1;transform:translateY(-3px);box-shadow:0 12px 40px rgba(217,28,28,0.12);}
+.pkg-card.featured{background:var(--red-light);border-color:rgba(217,28,28,0.2);}
+.pkg-featured-badge{position:absolute;top:20px;right:20px;background:var(--red);color:#fff;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border-radius:2px;}
+.pkg-tier{font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;font-family:'Space Mono',monospace;}
+.pkg-name{font-family:'Archivo Black',sans-serif;font-size:28px;letter-spacing:-1px;color:var(--black);margin-bottom:6px;}
+.pkg-price{font-family:'Archivo Black',sans-serif;font-size:36px;color:var(--red);letter-spacing:-1px;}
+.pkg-once{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:24px;}
+.pkg-divider{height:1px;background:var(--border);margin-bottom:20px;}
+.pkg-features{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:20px;}
+.pkg-features li{font-size:13px;color:var(--muted);display:flex;align-items:flex-start;gap:8px;line-height:1.5;}
+.pkg-features li::before{content:"✓";color:var(--red);font-size:12px;flex-shrink:0;font-weight:700;margin-top:1px;}
+.pkg-features li.hl{color:var(--black);font-weight:500;}
+.pkg-devices{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--red-mid);border-left:3px solid var(--red);margin-bottom:20px;}
+.pkg-devices-text{font-size:11px;color:var(--red);font-weight:700;}
+.pkg-cta{width:100%;background:var(--black);color:#fff;padding:14px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;border-radius:2px;}
+.pkg-card:hover .pkg-cta,.pkg-card.featured .pkg-cta{background:var(--red);}
+
+/* HOW IT WORKS */
+.how-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start;}
+.how-steps{display:flex;flex-direction:column;gap:0;}
+.how-step{display:grid;grid-template-columns:52px 1fr;gap:18px;padding:24px 0;border-bottom:1px solid var(--border);align-items:start;}
+.how-step:last-child{border-bottom:none;}
+.how-num{width:52px;height:52px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Archivo Black',sans-serif;font-size:18px;color:var(--red);flex-shrink:0;}
+.how-step-title{font-family:'Archivo Black',sans-serif;font-size:17px;letter-spacing:-0.3px;color:var(--black);margin-bottom:5px;}
+.how-step-desc{font-size:13px;color:var(--muted);line-height:1.65;}
+
+/* HOW RIGHT COLUMN */
+.how-right{display:flex;flex-direction:column;gap:20px;}
+.tracker-img-card{position:relative;overflow:hidden;border-radius:2px;border:1px solid var(--border);}
+.tracker-img-card img{width:100%;height:340px;object-fit:cover;object-position:center 20%;display:block;}
+.tracker-killer-headline{background:var(--black);padding:28px 28px 24px;position:relative;}
+.tracker-killer-headline::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:var(--red);}
+.tracker-killer-tag{font-family:'Space Mono',monospace;font-size:10px;color:var(--red);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;}
+.tracker-killer-title{font-family:'Archivo Black',sans-serif;font-size:28px;color:#fff;letter-spacing:-1px;line-height:1.1;margin-bottom:8px;}
+.tracker-killer-sub{font-size:13px;color:rgba(255,255,255,0.45);letter-spacing:1px;font-style:italic;}
+.tracker-img-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(17,17,17,0.85),transparent);padding:20px;}
+.tracker-img-label{font-size:10px;color:rgba(255,255,255,0.6);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.tracker-img-title{font-family:'Archivo Black',sans-serif;font-size:16px;color:#fff;letter-spacing:-0.3px;}
+.features-card{background:var(--white);border:1px solid var(--border);overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.05);}
+.features-card-header{background:var(--black);padding:18px 22px;}
+.features-card-title{font-family:'Archivo Black',sans-serif;font-size:16px;color:#fff;letter-spacing:-0.3px;}
+.features-card-sub{font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.features-list{display:flex;flex-direction:column;}
+.feature-item{display:flex;align-items:flex-start;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);}
+.feature-item:last-child{border-bottom:none;}
+.feature-icon{width:32px;height:32px;background:var(--red-light);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;border-radius:2px;}
+.feature-text strong{font-size:13px;color:var(--black);display:block;margin-bottom:1px;font-weight:600;}
+.feature-text span{font-size:12px;color:var(--muted);}
+
+/* TESTIMONIALS — CAROUSEL */
+.testi-carousel{position:relative;overflow:hidden;}
+.testi-track{display:flex;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1);}
+.testi-slide{min-width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.testi-card{background:var(--white);border:1px solid var(--border);padding:28px;position:relative;}
+.testi-stars{display:flex;gap:3px;margin-bottom:14px;}
+.testi-star{color:var(--red);font-size:14px;}
+.testi-text{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px;font-style:italic;}
+.testi-divider{height:1px;background:var(--border);margin-bottom:16px;}
+.testi-author{display:flex;align-items:center;gap:12px;}
+.testi-avatar{width:40px;height:40px;border-radius:50%;background:var(--red-mid);border:2px solid var(--red-light);display:flex;align-items:center;justify-content:center;font-family:'Archivo Black',sans-serif;font-size:14px;color:var(--red);flex-shrink:0;}
+.testi-name{font-family:'Archivo Black',sans-serif;font-size:14px;color:var(--black);letter-spacing:-0.3px;}
+.testi-location{font-size:11px;color:var(--muted2);margin-top:1px;}
+.testi-controls{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:32px;}
+.testi-dot{width:8px;height:8px;border-radius:50%;background:var(--border);border:none;cursor:pointer;transition:background 0.2s;padding:0;}
+.testi-dot.active{background:var(--red);}
+.testi-nav{background:transparent;border:1.5px solid var(--border);color:var(--muted);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.testi-nav:hover{border-color:var(--red);color:var(--red);}
+.testi-auto-bar{height:3px;background:var(--border);margin-top:16px;border-radius:2px;overflow:hidden;}
+.testi-auto-fill{height:100%;background:var(--red);width:0%;transition:width 5s linear;}
+
+/* CTA FORM */
+.cta-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;}
+.cta-info-title{font-family:'Archivo Black',sans-serif;font-size:clamp(36px,4vw,52px);letter-spacing:-1.5px;line-height:1.0;margin-bottom:16px;color:var(--black);}
+.cta-info-title span{color:var(--red);}
+.cta-info-desc{font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:28px;}
+.promises{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);}
+.promise{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border-bottom:1px solid var(--border);}
+.promise:last-child{border-bottom:none;}
+.promise-icon{color:var(--red);font-size:13px;margin-top:1px;flex-shrink:0;}
+.promise-text{font-size:13px;color:var(--muted);line-height:1.55;}
+.promise-text strong{color:var(--black);font-weight:600;}
+.contact-cards{display:flex;gap:12px;margin-top:24px;}
+.contact-card{flex:1;border:1px solid var(--border);padding:14px;text-decoration:none;display:flex;flex-direction:column;gap:4px;transition:border-color 0.2s;}
+.contact-card:hover{border-color:var(--red);}
+.contact-card-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.contact-card-value{font-size:13px;color:var(--black);font-weight:600;}
+.form-box{background:var(--grey);border:1px solid var(--border);padding:36px;}
+.form-title{font-family:'Archivo Black',sans-serif;font-size:24px;letter-spacing:-0.5px;color:var(--black);margin-bottom:4px;}
+.form-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+.form-group{margin-bottom:15px;}
+.form-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:7px;font-weight:600;}
+.form-input{width:100%;background:var(--white);border:1.5px solid var(--border);color:var(--text);padding:12px 13px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;border-radius:2px;}
+.form-input:focus{border-color:var(--red);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-submit{width:100%;background:var(--red);color:#fff;padding:17px;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border:none;cursor:pointer;transition:background 0.2s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:10px;border-radius:2px;}
+.form-submit:hover{background:var(--red-dark);}
+.form-note{font-size:11px;color:var(--muted);text-align:center;margin-top:10px;}
+.wa-direct{margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border:1.5px solid rgba(37,211,102,0.35);color:var(--wa);font-size:12px;font-weight:700;text-decoration:none;letter-spacing:1px;transition:all 0.2s;border-radius:2px;text-transform:uppercase;}
+.wa-direct:hover{background:rgba(37,211,102,0.06);}
+
+footer{background:var(--black);padding:44px 64px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
+.footer-logo{font-family:'Archivo Black',sans-serif;font-size:22px;color:#fff;letter-spacing:-0.5px;}
+.footer-logo span{color:var(--red);}
+.footer-text{font-size:12px;color:rgba(255,255,255,0.4);text-align:center;line-height:1.8;}
+.footer-links{display:flex;gap:24px;}
+.footer-links a{font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;transition:color 0.2s;}
+.footer-links a:hover{color:#fff;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(17,17,17,0.55);z-index:200;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--white);border:1px solid var(--border);max-width:520px;width:100%;max-height:90vh;overflow-y:auto;position:relative;animation:modalIn 0.25s ease;box-shadow:0 24px 80px rgba(0,0,0,0.15);border-radius:2px;}
+@keyframes modalIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.modal-top{background:var(--black);padding:26px 30px;display:flex;align-items:flex-start;justify-content:space-between;}
+.modal-top-tag{font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:3px;text-transform:uppercase;margin-bottom:5px;font-family:'Space Mono',monospace;}
+.modal-top-title{font-family:'Archivo Black',sans-serif;font-size:24px;color:#fff;letter-spacing:-0.5px;}
+.modal-top-price{font-family:'Archivo Black',sans-serif;font-size:18px;color:var(--red);margin-top:3px;}
+.modal-close{background:rgba(255,255,255,0.1);border:none;color:rgba(255,255,255,0.6);font-size:18px;cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;border-radius:2px;}
+.modal-close:hover{background:rgba(255,255,255,0.2);color:#fff;}
+.modal-body{padding:26px 30px 30px;}
+.modal-step{display:none;}
+.modal-step.active{display:block;}
+.modal-step-title{font-family:'Archivo Black',sans-serif;font-size:17px;letter-spacing:-0.3px;color:var(--black);margin-bottom:3px;}
+.modal-step-sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.modal-features{display:flex;flex-direction:column;gap:7px;margin-bottom:18px;}
+.modal-feature{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--muted);padding:9px 11px;background:var(--grey);border:1px solid var(--border);}
+.modal-feature-tick{color:var(--red);font-size:12px;flex-shrink:0;font-weight:700;margin-top:1px;}
+.modal-devices-box{display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--red-light);border-left:3px solid var(--red);margin-bottom:18px;}
+.modal-devices-text{font-size:12px;color:var(--red);font-weight:700;}
+.modal-next-btn{width:100%;background:var(--red);color:#fff;padding:15px;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.2s;margin-bottom:9px;border-radius:2px;}
+.modal-next-btn:hover{background:var(--red-dark);}
+.modal-back-btn{width:100%;background:transparent;color:var(--muted);padding:11px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;border:1.5px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;border-radius:2px;}
+.modal-back-btn:hover{border-color:var(--black);color:var(--black);}
+.modal-form-group{margin-bottom:13px;}
+.modal-form-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:6px;font-weight:600;}
+.modal-form-input{width:100%;background:var(--grey);border:1.5px solid var(--border);color:var(--text);padding:11px 12px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;border-radius:2px;}
+.modal-form-input:focus{border-color:var(--red);}
+.modal-form-row{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.progress-dots{display:flex;gap:6px;justify-content:center;margin-bottom:18px;}
+.progress-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:background 0.2s;}
+.progress-dot.active{background:var(--red);}
+.confirm-summary{background:var(--grey);border:1px solid var(--border);padding:18px;margin-bottom:18px;border-radius:2px;}
+.confirm-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.confirm-row:last-child{border-bottom:none;}
+.confirm-row-label{color:var(--muted);}
+.confirm-row-value{font-weight:600;color:var(--text);}
+.confirm-pkg{color:var(--red)!important;}
+
+@media(max-width:960px){
+  .hero{grid-template-columns:1fr;}
+  .hero-right{height:55vw;}
+  .hero-left{padding:80px 24px 48px;}
+  .packages-grid{grid-template-columns:1fr;}
+  .testi-slide{grid-template-columns:1fr;}
+  .how-grid{grid-template-columns:1fr;}
+  .cta-grid{grid-template-columns:1fr;}
+  .section{padding:64px 24px;}
+  nav{padding:0 24px;}
+  .nav-links{display:none;}
+  footer{flex-direction:column;text-align:center;padding:32px 24px;}
+  .trust-bar{padding:14px 24px;gap:20px;}
+  .form-row,.modal-form-row{grid-template-columns:1fr;}
+  .contact-cards{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">TREK<span>24</span></div>
+  <div class="nav-links">
+    <a href="#packages">Packages</a>
+    <a href="#how">How It Works</a>
+    <a href="#testimonials">Reviews</a>
+    <a href="#contact" class="nav-cta">Book Now</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-dot"></div>
+      <div class="hero-eyebrow-text">Zimbabwe & South Africa — Nationwide</div>
+    </div>
+    <h1 class="hero-h1">PROTECT YOUR<br/>VEHICLE.<br/><span>PAY ONCE.</span></h1>
+    <p class="hero-sub">Real-time GPS tracking with remote engine cut-off and engine start alerts. One payment — no monthly fees, no contracts, ever. We come to you.</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">$65</div><div class="stat-label">Starting price</div></div>
+      <div class="stat"><div class="stat-num">30<small style="font-size:16px">min</small></div><div class="stat-label">Installation</div></div>
+      <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Live tracking</div></div>
+    </div>
+    <div class="hero-btns">
+      <a href="#packages" class="btn-primary">View Packages &rarr;</a>
+      <a href="#contact" class="btn-outline">Book Installation</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <img src="technician.jpg" alt="Trek24 Technician"/>
+    <div class="hero-badge">
+      <div class="hero-badge-label">Guaranteed</div>
+      <div class="hero-badge-value">NO MONTHLY FEES</div>
+    </div>
+  </div>
+</section>
+
+<div class="trust-bar">
+  <div class="trust-item"><span>→</span> Real-time GPS Tracking</div>
+  <div class="trust-sep"></div>
+  <div class="trust-item"><span>→</span> Remote Engine Cut-off</div>
+  <div class="trust-sep"></div>
+  <div class="trust-item"><span>→</span> Engine Start Alerts</div>
+  <div class="trust-sep"></div>
+  <div class="trust-item"><span>→</span> We Come To You</div>
+  <div class="trust-sep"></div>
+  <div class="trust-item"><span>→</span> Once-off Payment</div>
+</div>
+
+<section class="section" id="packages">
+  <div class="section-tag">// Our Packages</div>
+  <h2 class="section-title">CHOOSE YOUR<br/><span>PROTECTION</span></h2>
+  <p class="section-sub">All packages include professional installation at your location. Pay once — protected forever. Engine start alerts included on every package.</p>
+  <div class="country-toggle">
+    <button class="country-btn active" onclick="switchCountry('ZW',this)">🇿🇼 Zimbabwe (USD)</button>
+    <button class="country-btn" onclick="switchCountry('SA',this)">🇿🇦 South Africa (ZAR)</button>
+  </div>
+  <div class="packages-grid">
+    <div class="pkg-card" onclick="openModal('lite')">
+      <div class="pkg-tier">// Entry</div>
+      <div class="pkg-name">Trek-Lite</div>
+      <div class="pkg-price" id="lite-price">$65</div>
+      <div class="pkg-once">once-off · no monthly fees</div>
+      <div class="pkg-divider"></div>
+      <ul class="pkg-features">
+        <li class="hl">Real-time GPS tracking</li>
+        <li class="hl">24/7 vehicle location access</li>
+        <li class="hl">Engine start alerts on your phone</li>
+        <li>Trip history — 1 month</li>
+        <li>Speeding alerts</li>
+        <li>Mobile app (Android & iPhone)</li>
+        <li>Nationwide installation</li>
+      </ul>
+      <div class="pkg-devices"><div class="pkg-devices-text">📱 3 devices connected simultaneously</div></div>
+      <button class="pkg-cta">Book This Package →</button>
+    </div>
+    <div class="pkg-card featured" onclick="openModal('standard')">
+      <div class="pkg-featured-badge">Most Popular</div>
+      <div class="pkg-tier">// Recommended</div>
+      <div class="pkg-name">Trek-Standard</div>
+      <div class="pkg-price" id="standard-price">$75</div>
+      <div class="pkg-once">once-off · no monthly fees</div>
+      <div class="pkg-divider"></div>
+      <ul class="pkg-features">
+        <li class="hl">Everything in Trek-Lite</li>
+        <li class="hl">Remote engine cut-off</li>
+        <li class="hl">Engine start alerts on your phone</li>
+        <li>Trip history — 6 months</li>
+        <li>24/7 WhatsApp support</li>
+        <li>50% money-back guarantee</li>
+        <li>6-month device warranty</li>
+        <li>Nationwide installation</li>
+      </ul>
+      <div class="pkg-devices"><div class="pkg-devices-text">📱 5 devices connected simultaneously</div></div>
+      <button class="pkg-cta">Book This Package →</button>
+    </div>
+    <div class="pkg-card" id="premium-card" onclick="openModal('premium')">
+      <div class="pkg-tier">// Complete</div>
+      <div class="pkg-name">Trek-Premium</div>
+      <div class="pkg-price" id="premium-price">$100</div>
+      <div class="pkg-once" id="premium-once">once-off · no monthly fees</div>
+      <div class="pkg-divider"></div>
+      <ul class="pkg-features" id="premium-features">
+        <li class="hl">Everything in Standard</li>
+        <li class="hl">Engine start alerts on your phone</li>
+        <li>SMS movement alerts</li>
+        <li>Theft prevention notifications</li>
+        <li>Voice monitoring</li>
+        <li>SAZ Tracker Certificate</li>
+        <li>Panic button</li>
+        <li>Driver behaviour monitoring</li>
+        <li>Vehicle recovery assistance</li>
+        <li>100% money-back guarantee</li>
+      </ul>
+      <div class="pkg-devices" id="premium-devices"><div class="pkg-devices-text">📱 Unlimited devices connected</div></div>
+      <button class="pkg-cta" id="premium-cta-btn">Book This Package →</button>
+    </div>
+  </div>
+</section>
+
+<section class="section section-grey" id="how">
+  <div class="section-tag">// How It Works</div>
+  <div class="how-grid">
+    <div>
+      <h2 class="section-title" style="margin-bottom:8px;">SIMPLE.<br/><span>FAST.</span><br/>DONE.</h2>
+      <p class="section-sub">Getting your vehicle protected takes less than an hour. We handle everything at your location.</p>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-num">01</div>
+          <div><div class="how-step-title">Choose Your Package</div><div class="how-step-desc">Pick the right plan — Trek-Lite for basics, Standard for full protection, Premium for everything.</div></div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">02</div>
+          <div><div class="how-step-title">Tell Us Your Location</div><div class="how-step-desc">Share your address and preferred date. We cover all of Zimbabwe and South Africa.</div></div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">03</div>
+          <div><div class="how-step-title">We Come To You</div><div class="how-step-desc">Our technician arrives at your location. Installation is clean and professional — 30 minutes.</div></div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">04</div>
+          <div><div class="how-step-title">Track Live & Stay Protected</div><div class="how-step-desc">Download the app, see your vehicle live, and get instant alerts the moment the engine starts.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="how-right">
+      <div class="tracker-img-card">
+        <div class="tracker-killer-headline">
+          <div class="tracker-killer-tag">// Professional Installation</div>
+          <div class="tracker-killer-title">The Device That<br/>Thieves Fear Most.</div>
+          <div class="tracker-killer-sub">Hidden. Hardwired. Always watching.</div>
+        </div>
+        <img src="installer.png" alt="Trek24 GPS Tracker Being Installed"/>
+        <div class="tracker-img-overlay">
+          <div class="tracker-img-label">Trek24 — Real Installation</div>
+          <div class="tracker-img-title">Installed in 30 minutes. Protected forever.</div>
+        </div>
+      </div>
+      <div class="features-card">
+        <div class="features-card-header">
+          <div class="features-card-title">Every Package Includes</div>
+          <div class="features-card-sub">Standard features across all tiers</div>
+        </div>
+        <div class="features-list">
+          <div class="feature-item"><div class="feature-icon">📍</div><div class="feature-text"><strong>Real-time GPS Tracking</strong><span>See your vehicle live on the map, 24/7</span></div></div>
+          <div class="feature-item"><div class="feature-icon">🔔</div><div class="feature-text"><strong>Engine Start Alerts</strong><span>Get notified on your phone the moment your engine starts</span></div></div>
+          <div class="feature-item"><div class="feature-icon">📱</div><div class="feature-text"><strong>Mobile App Access</strong><span>Android & iPhone. Track from anywhere.</span></div></div>
+          <div class="feature-item"><div class="feature-icon">🔧</div><div class="feature-text"><strong>Professional Installation</strong><span>We come to you. 30 minutes. Done.</span></div></div>
+          <div class="feature-item"><div class="feature-icon">💳</div><div class="feature-text"><strong>Once-off Payment</strong><span>No subscriptions. No surprises. Ever.</span></div></div>
+          <div class="feature-item"><div class="feature-icon">🚚</div><div class="feature-text"><strong>Nationwide Coverage</strong><span>Zimbabwe & South Africa — we come to you</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="testimonials">
+  <div class="section-tag">// Customer Reviews</div>
+  <h2 class="section-title">WHAT OUR<br/><span>CUSTOMERS SAY</span></h2>
+  <p class="section-sub">Real stories from vehicle owners across Zimbabwe and South Africa.</p>
+  <div class="testi-carousel">
+    <div class="testi-track" id="testi-track">
+      <div class="testi-slide">
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><div class="testi-text">"My car was almost stolen last year and I had nothing. Got Trek-Standard installed and now I sleep well. The engine start alert went off at 2am when my son borrowed the car — I knew immediately. Worth every cent."</div><div class="testi-divider"></div><div class="testi-author"><div class="testi-avatar">TM</div><div><div class="testi-name">Tatenda M. 🇿🇼</div><div class="testi-location">Harare, Zimbabwe · Trek-Standard</div></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><div class="testi-text">"Installation was so quick. The guy came to my house in Bellville, done in under 30 minutes and set up the app for me on the spot. The once-off price is unbeatable — I was paying R299 a month before. Never again."</div><div class="testi-divider"></div><div class="testi-author"><div class="testi-avatar">KD</div><div><div class="testi-name">Keanu D. 🇿🇦</div><div class="testi-location">Bellville, South Africa · Trek-Lite</div></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><div class="testi-text">"I have 4 delivery vehicles and put Trek-Standard on all of them. Can see all my drivers live. One driver was going off-route and I caught it immediately. Already saved me money. Would recommend to any business owner."</div><div class="testi-divider"></div><div class="testi-author"><div class="testi-avatar">FM</div><div><div class="testi-name">Farai M. 🇿🇼</div><div class="testi-location">Bulawayo, Zimbabwe · Trek-Standard × 4</div></div></div></div>
+      </div>
+      <div class="testi-slide">
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><div class="testi-text">"Thought it was too good to be true — once-off with no monthly fees. But it's real. The app works perfectly and the engine start alert is a game changer. Car parks in Joburg are scary, now I know the second someone touches my car."</div><div class="testi-divider"></div><div class="testi-author"><div class="testi-avatar">NP</div><div><div class="testi-name">Nolwazi P. 🇿🇦</div><div class="testi-location">Johannesburg, South Africa · Trek-Standard</div></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><div class="testi-text">"Trek24 came to my workplace in Mount Pleasant and installed during my lunch break. Was tracking my car before I finished eating. The remote engine cut-off gave me total peace of mind. Excellent service."</div><div class="testi-divider"></div><div class="testi-author"><div class="testi-avatar">CS</div><div><div class="testi-name">Chiedza S. 🇿🇼</div><div class="testi-location">Mount Pleasant, Zimbabwe · Trek-Premium</div></div></div></div>
+        <div class="testi-card"><div class="testi-stars">★★★★★</div><div class="testi-text">"Had Trek-Lite on my bakkie for 6 months now. App is simple and always accurate. No bills, no contracts. Referred my brother and he got Trek-Standard. Trek24 team always replies fast on WhatsApp."</div><div class="testi-divider"></div><div class="testi-author"><div class="testi-avatar">RV</div><div><div class="testi-name">Ruan V. 🇿🇦</div><div class="testi-location">Cape Town, South Africa · Trek-Lite</div></div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="testi-controls">
+    <button class="testi-nav" onclick="prevSlide()">&#8592;</button>
+    <button class="testi-dot active" id="dot-0" onclick="goSlide(0)"></button>
+    <button class="testi-dot" id="dot-1" onclick="goSlide(1)"></button>
+    <button class="testi-nav" onclick="nextSlide()">&#8594;</button>
+  </div>
+  <div class="testi-auto-bar"><div class="testi-auto-fill" id="testi-fill"></div></div>
+</section>
+
+<section class="section section-grey" id="contact">
+  <div class="cta-grid">
+    <div>
+      <div class="section-tag">// Book Installation</div>
+      <h2 class="cta-info-title">READY TO<br/><span>PROTECT</span><br/>YOUR CAR?</h2>
+      <p class="cta-info-desc">Fill in the form — we confirm your slot within a few hours. Payment is on the day at your location. Cash or EcoCash. No upfront online payments.</p>
+      <div class="promises">
+        <div class="promise"><div class="promise-icon">→</div><div class="promise-text"><strong>We come to you</strong> — anywhere in Zimbabwe or South Africa</div></div>
+        <div class="promise"><div class="promise-icon">→</div><div class="promise-text"><strong>30-minute installation</strong> — professional and clean</div></div>
+        <div class="promise"><div class="promise-icon">→</div><div class="promise-text"><strong>Pay on the day</strong> — cash or EcoCash, no upfront online payment</div></div>
+        <div class="promise"><div class="promise-icon">→</div><div class="promise-text"><strong>Once-off forever</strong> — you will never pay a monthly fee</div></div>
+        <div class="promise"><div class="promise-icon">→</div><div class="promise-text"><strong>Engine start alerts</strong> on every package — know the second your car moves</div></div>
+      </div>
+      <div class="contact-cards">
+        <a class="contact-card" href="https://wa.me/263775594799" target="_blank">
+          <div class="contact-card-label">Zimbabwe WhatsApp</div>
+          <div class="contact-card-value">+263 77 559 4799</div>
+        </a>
+        <a class="contact-card" href="https://wa.me/27648244594" target="_blank">
+          <div class="contact-card-label">South Africa WhatsApp</div>
+          <div class="contact-card-value">+27 64 824 4594</div>
+        </a>
+      </div>
+    </div>
+    <div class="form-box" id="contact-form-wrap">
+      <div class="form-title">Book Your Installation</div>
+      <div class="form-sub">We'll confirm your slot within a few hours.</div>
+      <div id="form-content">
+        <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" type="text" id="f-name" placeholder="Your full name"/></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">WhatsApp Number</label><input class="form-input" type="tel" id="f-phone" placeholder="+263 77 ..."/></div>
+          <div class="form-group"><label class="form-label">Country</label><select class="form-input" id="f-country"><option value="Zimbabwe">🇿🇼 Zimbabwe</option><option value="South Africa">🇿🇦 South Africa</option></select></div>
+        </div>
+        <div class="form-group"><label class="form-label">Your Location / Area</label><input class="form-input" type="text" id="f-location" placeholder="e.g. Harare CBD, Cape Town, Bulawayo"/></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Package</label><select class="form-input" id="f-package"><option>Trek-Lite</option><option selected>Trek-Standard</option><option>Trek-Premium</option></select></div>
+          <div class="form-group"><label class="form-label">Availability</label><select class="form-input" id="f-availability"><option>Today</option><option>Tomorrow</option><option>This weekend</option><option>Next week</option></select></div>
+        </div>
+        <div class="form-group"><label class="form-label">Vehicle Type</label><select class="form-input" id="f-vehicle"><option>Personal Car</option><option>SUV / 4x4</option><option>Bakkie / Pick-up</option><option>Minibus / Kombi</option><option>Truck / Commercial</option><option>Fleet (Multiple Vehicles)</option></select></div>
+        <button class="form-submit" onclick="submitForm()"><span>💬</span> Send to WhatsApp & Book</button>
+        <div class="form-note">Your details are sent directly to our team via WhatsApp</div>
+        <a class="wa-direct" href="https://wa.me/263775594799" target="_blank">💬 Chat with us directly on WhatsApp</a>
+      </div>
+      <div id="success-msg" style="display:none;text-align:center;padding:40px 0;">
+        <div style="font-size:48px;margin-bottom:12px;">🎉</div>
+        <div style="font-family:'Archivo Black',sans-serif;font-size:24px;color:var(--red);margin-bottom:8px;">YOU'RE BOOKED!</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.65;">Your details have been sent to our Trek24 team via WhatsApp.<br/>We will confirm your installation slot shortly!</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">TREK<span>24</span></div>
+  <div class="footer-text">GPS Vehicle Tracking · Once Off. Always On.<br/>Zimbabwe: +263 77 559 4799 · South Africa: +27 64 824 4594</div>
+  <div class="footer-links">
+    <a href="#packages">Packages</a>
+    <a href="#how">How It Works</a>
+    <a href="#contact">Book Now</a>
+  </div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-top">
+      <div>
+        <div class="modal-top-tag">// GPS Vehicle Tracking</div>
+        <div class="modal-top-title" id="modal-title">Trek-Lite</div>
+        <div class="modal-top-price" id="modal-price">$65 once-off</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="progress-dots" id="progress-dots">
+        <div class="progress-dot active" id="pdot-0"></div>
+        <div class="progress-dot" id="pdot-1"></div>
+        <div class="progress-dot" id="pdot-2"></div>
+      </div>
+      <div class="modal-step active" id="modal-step-0">
+        <div class="modal-step-title">What's included</div>
+        <div class="modal-step-sub">Everything you get with this package.</div>
+        <div class="modal-features" id="modal-features"></div>
+        <div class="modal-devices-box"><div class="modal-devices-text" id="modal-devices">📱 3 devices connected simultaneously</div></div>
+        <button class="modal-next-btn" onclick="goStep(1)">Book This Package →</button>
+      </div>
+      <div class="modal-step" id="modal-step-1">
+        <div class="modal-step-title">Your details</div>
+        <div class="modal-step-sub">So we can confirm your installation slot.</div>
+        <div class="modal-form-group"><label class="modal-form-label">Full Name</label><input class="modal-form-input" type="text" id="m-name" placeholder="Your full name"/></div>
+        <div class="modal-form-row">
+          <div class="modal-form-group"><label class="modal-form-label">WhatsApp Number</label><input class="modal-form-input" type="tel" id="m-phone" placeholder="+263 77 ..."/></div>
+          <div class="modal-form-group"><label class="modal-form-label">Country</label><select class="modal-form-input" id="m-country"><option value="Zimbabwe">🇿🇼 Zimbabwe</option><option value="South Africa">🇿🇦 South Africa</option></select></div>
+        </div>
+        <div class="modal-form-group"><label class="modal-form-label">Your Location / Area</label><input class="modal-form-input" type="text" id="m-location" placeholder="e.g. Harare CBD, Cape Town..."/></div>
+        <div class="modal-form-row">
+          <div class="modal-form-group"><label class="modal-form-label">Vehicle Type</label><select class="modal-form-input" id="m-vehicle"><option>Personal Car</option><option>SUV / 4x4</option><option>Bakkie / Pick-up</option><option>Minibus / Kombi</option><option>Truck / Commercial</option><option>Fleet (Multiple)</option></select></div>
+          <div class="modal-form-group"><label class="modal-form-label">Availability</label><select class="modal-form-input" id="m-availability"><option>Today</option><option>Tomorrow</option><option>This weekend</option><option>Next week</option></select></div>
+        </div>
+        <button class="modal-next-btn" onclick="goStep(2)">Continue →</button>
+        <button class="modal-back-btn" onclick="goStep(0)">← Back</button>
+      </div>
+      <div class="modal-step" id="modal-step-2">
+        <div class="modal-step-title">Confirm your booking</div>
+        <div class="modal-step-sub">Review your details before we send to WhatsApp.</div>
+        <div class="confirm-summary" id="confirm-summary"></div>
+        <div class="modal-form-group"><label class="modal-form-label">Exact Address or Landmark (optional)</label><input class="modal-form-input" type="text" id="m-address" placeholder="e.g. Near Eastgate Mall, Harare"/></div>
+        <div class="modal-form-group"><label class="modal-form-label">Additional Notes (optional)</label><input class="modal-form-input" type="text" id="m-notes" placeholder="e.g. Call when 10 minutes away"/></div>
+        <button class="modal-next-btn" onclick="sendBooking()">💬 Send to WhatsApp & Confirm</button>
+        <button class="modal-back-btn" onclick="goStep(1)">← Edit Details</button>
+      </div>
+      <div class="modal-step" id="modal-step-3">
+        <div style="text-align:center;padding:20px 0;">
+          <div style="font-size:48px;margin-bottom:12px;">🎉</div>
+          <div style="font-family:'Archivo Black',sans-serif;font-size:24px;color:var(--red);margin-bottom:8px;">YOU'RE BOOKED!</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.65;">Your booking details have been sent to Trek24 via WhatsApp.<br/>Our team will confirm your installation slot shortly!<br/><br/>Check your WhatsApp for our reply.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const WA_ZW='263775594799', WA_SA='27648244594';
+let currentCountry='ZW', currentPkg='lite', currentStep=0;
+
+const pkgData={
+  ZW:{
+    lite:{price:'$65',waLabel:'Trek-Lite ($65 once-off)',devices:'3 devices connected simultaneously',features:['Real-time vehicle tracking','24/7 access to vehicle location','Engine start alerts on your phone','Trip history — 1 month','Speeding alerts','Mobile app — Android & iPhone','Fast & easy installation','No contracts, no monthly fees','Nationwide delivery & installation']},
+    standard:{price:'$75',waLabel:'Trek-Standard ($75 once-off)',devices:'5 devices connected simultaneously',features:['Everything in Trek-Lite','Remote engine cut-off — stop your car remotely','Engine start alerts on your phone','Trip history — 6 months','24/7 WhatsApp support','50% money-back if we fail to recover your vehicle','6-month tracker guarantee','Nationwide delivery & installation']},
+    premium:{price:'$100',waLabel:'Trek-Premium ($100 once-off)',devices:'Unlimited devices connected',available:true,features:['Everything in Standard','Engine start alerts on your phone','SMS movement alerts via app','Theft prevention alerts & notifications','Voice monitoring','SAZ Tracker Certificate','Panic button','Driver behaviour monitoring','Vehicle recovery assistance','100% money-back if we fail to recover your vehicle','Nationwide delivery & installation']}
+  },
+  SA:{
+    lite:{price:'R1,200',waLabel:'Trek-Lite (R1,200 once-off)',devices:'3 devices connected simultaneously',features:['Real-time vehicle tracking','24/7 access to vehicle location','Engine start alerts on your phone','Trip history — 1 month','Speeding alerts','Mobile app — Android & iPhone','Fast & easy installation','No contracts, no monthly fees','Nationwide delivery & installation']},
+    standard:{price:'R1,600',waLabel:'Trek-Standard (R1,600 once-off)',devices:'5 devices connected simultaneously',features:['Everything in Trek-Lite','Remote engine cut-off — stop your car remotely','Engine start alerts on your phone','Trip history — 6 months','24/7 WhatsApp support','50% money-back if we fail to recover your vehicle','6-month tracker guarantee','Nationwide delivery & installation']},
+    premium:{price:'R2,500',waLabel:'Trek-Premium',devices:'Unlimited devices connected',available:false,features:[]}
+  }
+};
+
+function switchCountry(c,btn){
+  currentCountry=c;
+  document.querySelectorAll('.country-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const d=pkgData[c];
+  document.getElementById('lite-price').textContent=d.lite.price;
+  document.getElementById('standard-price').textContent=d.standard.price;
+  document.getElementById('premium-price').textContent=d.premium.price;
+  const pc=document.getElementById('premium-card'),pd=document.getElementById('premium-devices'),pf=document.getElementById('premium-features'),pb=document.getElementById('premium-cta-btn'),po=document.getElementById('premium-once');
+  if(c==='SA'){
+    pc.style.cssText='cursor:not-allowed;opacity:0.5;';pc.onclick=null;
+    po.textContent='Coming Soon';po.style.color='var(--red)';
+    pd.style.display='none';
+    pf.innerHTML='<li style="list-style:none;color:var(--muted2);font-style:italic;padding:8px 0;">Trek-Premium is coming soon for South Africa.</li>';
+    pb.textContent='⏳ Coming Soon';pb.style.opacity='0.5';pb.style.cursor='not-allowed';
+  } else {
+    pc.style.cssText='';pc.onclick=()=>openModal('premium');
+    po.textContent='once-off · no monthly fees';po.style.color='';
+    pd.style.display='flex';
+    pf.innerHTML=pkgData.ZW.premium.features.map(f=>`<li class="hl">${f}</li>`).join('');
+    pb.textContent='Book This Package →';pb.style.opacity='1';pb.style.cursor='pointer';
+  }
+}
+
+function openModal(tier){
+  if(currentCountry==='SA'&&tier==='premium')return;
+  currentPkg=tier;currentStep=0;
+  const d=pkgData[currentCountry][tier];
+  const names={lite:'Trek-Lite',standard:'Trek-Standard',premium:'Trek-Premium'};
+  document.getElementById('modal-title').textContent=names[tier];
+  document.getElementById('modal-price').textContent=d.price+' once-off';
+  document.getElementById('modal-features').innerHTML=d.features.map(f=>`<div class="modal-feature"><span class="modal-feature-tick">✓</span><span>${f}</span></div>`).join('');
+  document.getElementById('modal-devices').textContent='📱 '+d.devices;
+  showStep(0);
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function showStep(s){
+  currentStep=s;
+  document.querySelectorAll('.modal-step').forEach((el,i)=>el.classList.toggle('active',i===s));
+  document.querySelectorAll('[id^="pdot-"]').forEach((d,i)=>d.classList.toggle('active',i===s));
+  document.getElementById('progress-dots').style.display=s===3?'none':'flex';
+}
+
+function goStep(s){
+  if(s===2){
+    const name=document.getElementById('m-name').value.trim(),phone=document.getElementById('m-phone').value.trim();
+    if(!name||!phone){alert('Please fill in your name and WhatsApp number.');return;}
+    const country=document.getElementById('m-country').value,location=document.getElementById('m-location').value.trim()||'Not specified',vehicle=document.getElementById('m-vehicle').value,avail=document.getElementById('m-availability').value;
+    const d=pkgData[currentCountry][currentPkg];
+    document.getElementById('confirm-summary').innerHTML=`
+      <div class="confirm-row"><span class="confirm-row-label">Package</span><span class="confirm-row-value confirm-pkg">${d.waLabel}</span></div>
+      <div class="confirm-row"><span class="confirm-row-label">Name</span><span class="confirm-row-value">${name}</span></div>
+      <div class="confirm-row"><span class="confirm-row-label">WhatsApp</span><span class="confirm-row-value">${phone}</span></div>
+      <div class="confirm-row"><span class="confirm-row-label">Country</span><span class="confirm-row-value">${country}</span></div>
+      <div class="confirm-row"><span class="confirm-row-label">Location</span><span class="confirm-row-value">${location}</span></div>
+      <div class="confirm-row"><span class="confirm-row-label">Vehicle</span><span class="confirm-row-value">${vehicle}</span></div>
+      <div class="confirm-row"><span class="confirm-row-label">Available</span><span class="confirm-row-value">${avail}</span></div>
+    `;
+  }
+  showStep(s);
+}
+
+function sendBooking(){
+  const d=pkgData[currentCountry][currentPkg];
+  const name=document.getElementById('m-name').value.trim(),phone=document.getElementById('m-phone').value.trim();
+  const country=document.getElementById('m-country').value,location=document.getElementById('m-location').value.trim()||'Not specified';
+  const vehicle=document.getElementById('m-vehicle').value,avail=document.getElementById('m-availability').value;
+  const address=document.getElementById('m-address').value.trim(),notes=document.getElementById('m-notes').value.trim();
+  let msg=`Hi Trek24! I want to book an installation.\n\nPackage: ${d.waLabel}\nName: ${name}\nPhone: ${phone}\nCountry: ${country}\nArea: ${location}`;
+  if(address)msg+=`\nExact Address: ${address}`;
+  msg+=`\nVehicle: ${vehicle}\nAvailability: ${avail}`;
+  if(notes)msg+=`\nNotes: ${notes}`;
+  msg+=`\n\nPlease confirm my slot. Thank you!`;
+  const waNum=country==='South Africa'?WA_SA:WA_ZW;
+  window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`,'_blank');
+  showStep(3);
+}
+
+function submitForm(){
+  const name=document.getElementById('f-name').value.trim(),phone=document.getElementById('f-phone').value.trim();
+  if(!name||!phone){alert('Please fill in your name and phone number.');return;}
+  const country=document.getElementById('f-country').value,location=document.getElementById('f-location').value.trim()||'Not specified';
+  const pkg=document.getElementById('f-package').value,avail=document.getElementById('f-availability').value,vehicle=document.getElementById('f-vehicle').value;
+  const msg=`Hi Trek24! I want to book an installation.\n\nPackage: ${pkg}\nName: ${name}\nPhone: ${phone}\nCountry: ${country}\nLocation: ${location}\nVehicle: ${vehicle}\nAvailability: ${avail}\n\nPlease confirm my slot. Thank you!`;
+  const waNum=country==='South Africa'?WA_SA:WA_ZW;
+  window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`,'_blank');
+  document.getElementById('form-content').style.display='none';
+  document.getElementById('success-msg').style.display='block';
+}
+
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');document.body.style.overflow='';}
+function closeModalOutside(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+// TESTIMONIAL CAROUSEL
+let currentSlide=0,slideTotal=2,autoTimer=null,fillTimer=null;
+function goSlide(n){
+  currentSlide=n;
+  document.getElementById('testi-track').style.transform=`translateX(-${n*100}%)`;
+  document.querySelectorAll('[id^="dot-"]').forEach((d,i)=>d.classList.toggle('active',i===n));
+  resetAutoFill();
+}
+function nextSlide(){goSlide((currentSlide+1)%slideTotal);}
+function prevSlide(){goSlide((currentSlide-1+slideTotal)%slideTotal);}
+function resetAutoFill(){
+  clearInterval(autoTimer);clearTimeout(fillTimer);
+  const fill=document.getElementById('testi-fill');
+  fill.style.transition='none';fill.style.width='0%';
+  setTimeout(()=>{fill.style.transition='width 5s linear';fill.style.width='100%';},50);
+  autoTimer=setInterval(nextSlide,5000);
+}
+resetAutoFill();
+</script>
+</body>
+</html>
