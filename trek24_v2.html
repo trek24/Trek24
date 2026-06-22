@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trek24 | GPS Car Tracking — Once-Off. Always On.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:    #0A0A0A;
+      --surface:  #141414;
+      --card:     #1A1A1A;
+      --border:   rgba(255,255,255,0.08);
+      --white:    #FFFFFF;
+      --red:      #E8192C;
+      --red-dim:  #C2141F;
+      --red-glow: rgba(232,25,44,0.15);
+      --muted:    rgba(255,255,255,0.45);
+      --body:     rgba(255,255,255,0.72);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--black);
+      color: var(--white);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      height: 64px;
+      background: rgba(10,10,10,0.95);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: var(--red); }
+
+    .nav-wa {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #25D366;
+      color: #000;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 9px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-wa:hover { opacity: 0.88; }
+    .nav-wa svg { width: 18px; height: 18px; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 20px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: 35%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 560px;
+      height: 360px;
+      background: radial-gradient(ellipse, rgba(232,25,44,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid rgba(232,25,44,0.4);
+      background: rgba(232,25,44,0.08);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #ff6b78;
+      letter-spacing: 0.3px;
+      margin-bottom: 24px;
+    }
+
+    .pulse {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--red);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50% { opacity:0.4; transform:scale(0.85); }
+    }
+
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(34px, 9vw, 68px);
+      font-weight: 700;
+      line-height: 1.04;
+      letter-spacing: -2px;
+      max-width: 640px;
+      margin-bottom: 18px;
+    }
+    h1 em { font-style: normal; color: var(--red); }
+
+    .hero-sub {
+      font-size: clamp(15px, 2.5vw, 18px);
+      color: var(--body);
+      max-width: 420px;
+      line-height: 1.65;
+      margin-bottom: 36px;
+    }
+
+    /* price pill */
+    .price-pill {
+      display: inline-block;
+      background: var(--card);
+      border: 1px solid rgba(232,25,44,0.35);
+      border-radius: 14px;
+      padding: 18px 36px;
+      margin-bottom: 32px;
+    }
+    .price-amount {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 56px;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1;
+    }
+    .price-amount sup { font-size: 28px; vertical-align: super; color: var(--red); }
+    .price-once { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .price-no-monthly { font-size: 12px; color: #ff6b78; margin-top: 3px; font-weight: 500; }
+
+    /* CTA buttons */
+    .btn-wa {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: #25D366;
+      color: #000;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 16px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      width: 100%;
+      max-width: 340px;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-wa:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-wa svg { width: 22px; height: 22px; flex-shrink: 0; }
+
+    .btn-red {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--red);
+      color: #fff;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 16px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-red:hover { background: var(--red-dim); transform: translateY(-1px); }
+
+    .hero-note { font-size: 13px; color: var(--muted); margin-top: 12px; }
+
+    /* ── SECTION WRAPPER ── */
+    .section {
+      padding: 72px 20px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .section-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      color: var(--red);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(24px, 5vw, 38px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      margin-bottom: 40px;
+      line-height: 1.1;
+    }
+
+    hr.div { border: none; border-top: 1px solid var(--border); }
+
+    /* ── STEPS ── */
+    .steps { display: grid; gap: 12px; }
+    .step {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 20px;
+    }
+    .step-n {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--red);
+      opacity: 0.35;
+      line-height: 1;
+      min-width: 28px;
+    }
+    .step h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    .step p { font-size: 14px; color: var(--body); line-height: 1.6; }
+
+    /* ── FEATURES ── */
+    .features { display: grid; gap: 12px; }
+    .feat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 20px;
+    }
+    .feat-icon {
+      width: 40px; height: 40px;
+      background: rgba(232,25,44,0.1);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px;
+    }
+    .feat-icon svg { width: 20px; height: 20px; stroke: var(--red); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .feat h3 { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .feat p { font-size: 13px; color: var(--body); line-height: 1.6; }
+
+    /* ── FORM SECTION ── */
+    .form-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 24px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .country-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .ctry-btn {
+      padding: 11px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--body);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .ctry-btn.active {
+      background: var(--red);
+      border-color: var(--red);
+      color: #fff;
+    }
+
+    .form-field { margin-bottom: 16px; }
+    .form-field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    .form-field input {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--white);
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-field input::placeholder { color: var(--muted); }
+    .form-field input:focus { border-color: rgba(232,25,44,0.5); }
+
+    .price-display {
+      background: var(--surface);
+      border: 1px solid rgba(232,25,44,0.25);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .price-display .pd-label { font-size: 13px; color: var(--muted); }
+    .price-display .pd-val {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--red);
+    }
+    .price-display .pd-note { font-size: 11px; color: var(--muted); }
+
+    /* ── FINAL CTA ── */
+    .final-cta {
+      text-align: center;
+      padding: 72px 20px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+    .final-cta h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(24px, 5vw, 40px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      margin-bottom: 10px;
+    }
+    .final-cta p { font-size: 16px; color: var(--muted); margin-bottom: 28px; }
+
+    footer {
+      padding: 28px 20px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+    footer strong { color: var(--white); }
+
+    @media (min-width: 600px) {
+      .steps { grid-template-columns: 1fr 1fr; }
+      .features { grid-template-columns: 1fr 1fr; }
+    }
+    @media (min-width: 860px) {
+      .steps { grid-template-columns: repeat(3, 1fr); }
+      .features { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    /* WA icon SVG reuse */
+    .wa-icon { fill: #000; }
+
+    /* ── PACKAGES ── */
+    .pkg-grid { display:grid; gap:16px; grid-template-columns:1fr; }
+    @media (min-width:700px) { .pkg-grid { grid-template-columns:repeat(3,1fr); align-items:start; } }
+    .pkg-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:24px 20px; display:flex; flex-direction:column; }
+    .pkg-featured { border-color:var(--red); }
+    .pkg-popular { display:inline-block; background:var(--red); color:#fff; font-size:11px; font-weight:700; letter-spacing:0.5px; padding:4px 12px; border-radius:999px; margin-bottom:14px; align-self:flex-start; }
+    .pkg-name { font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; margin-bottom:6px; }
+    .pkg-price { font-family:'Space Grotesk',sans-serif; font-size:40px; font-weight:700; line-height:1; margin-bottom:2px; }
+    .pkg-price span { font-size:16px; font-weight:500; color:var(--muted); }
+    .pkg-period { font-size:12px; color:var(--muted); margin-bottom:14px; }
+    .pkg-tier { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); border-top:1px solid var(--border); padding-top:14px; margin-bottom:14px; }
+    .pkg-list { list-style:none; flex:1; margin-bottom:20px; }
+    .pkg-list li { font-size:13px; color:var(--body); padding:6px 0 6px 20px; border-bottom:1px solid var(--border); position:relative; line-height:1.4; }
+    .pkg-list li:last-child { border-bottom:none; }
+    .pkg-list li::before { content:'✓'; position:absolute; left:0; color:var(--red); font-weight:700; font-size:12px; }
+    .pkg-cta { width:100%; padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--white); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14px; cursor:pointer; transition:background 0.2s; }
+    .pkg-cta:hover { background:var(--mid); }
+    .pkg-cta-red { background:var(--red); border-color:var(--red); }
+    .pkg-cta-red:hover { background:var(--red-dim); }
+    .pkg-sel-btn { width:100%; padding:11px 14px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--body); font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600; cursor:pointer; text-align:left; display:flex; justify-content:space-between; transition:all 0.15s; }
+    .pkg-sel-btn span { color:var(--muted); font-weight:400; }
+    .pkg-sel-btn.active { border-color:var(--red); background:rgba(232,25,44,0.08); color:var(--white); }
+    .pkg-sel-btn.active span { color:var(--red); font-weight:600; }
+
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Trek<span>24</span></div>
+  <a class="nav-wa" href="https://wa.me/263775594799?text=Hi%20Trek24%2C%20I%27d%20like%20to%20know%20more%20about%20GPS%20tracking." target="_blank" rel="noopener">
+    <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path class="wa-icon" d="M16 0C7.163 0 0 7.163 0 16c0 2.822.736 5.47 2.027 7.773L0 32l8.47-2.021A15.93 15.93 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm8.32 22.4c-.347.97-1.72 1.78-2.83 2.013-.75.155-1.73.28-5.03-1.08-4.22-1.712-6.94-5.99-7.15-6.27-.21-.28-1.71-2.27-1.71-4.33 0-2.06 1.08-3.07 1.46-3.49.38-.42.83-.53 1.1-.53.28 0 .55.003.79.013.25.01.59-.095.92.7.347.84 1.18 2.9 1.28 3.11.1.21.168.46.033.74-.14.28-.21.455-.42.7-.21.245-.44.547-.63.735-.21.21-.43.435-.185.855.245.42 1.09 1.796 2.34 2.91 1.608 1.437 2.964 1.882 3.38 2.092.42.21.665.175.91-.105.245-.28 1.05-1.225 1.33-1.645.28-.42.56-.35.945-.21.385.14 2.44 1.15 2.86 1.36.42.21.7.315.805.49.1.175.1 1.015-.245 1.985z"/></svg>
+    WhatsApp Us
+  </a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="badge"><div class="pulse"></div> Live GPS Tracking · Zimbabwe &amp; South Africa</div>
+  <h1>Track your cars.<br><em>Pay once.</em><br>Never again.</h1>
+  <p class="hero-sub">Real-time GPS tracking across Zimbabwe and South Africa. One payment, full control, always on.</p>
+  <div class="price-pill">
+    <div style="display:flex; gap:28px; justify-content:center; align-items:flex-end; margin-bottom:10px;">
+      <div style="text-align:center;">
+        <div style="font-size:11px; color:var(--muted); margin-bottom:3px; letter-spacing:0.5px;">🇿🇼 ZIMBABWE</div>
+        <div class="price-amount"><sup>$</sup>60</div>
+        <div style="font-size:11px; color:var(--muted);">USD · once-off</div>
+      </div>
+      <div style="width:1px; height:52px; background:var(--border);"></div>
+      <div style="text-align:center;">
+        <div style="font-size:11px; color:var(--muted); margin-bottom:3px; letter-spacing:0.5px;">🇿🇦 SOUTH AFRICA</div>
+        <div class="price-amount">R<span style="font-size:38px;">1,200</span></div>
+        <div style="font-size:11px; color:var(--muted);">ZAR · once-off</div>
+      </div>
+    </div>
+    <div class="price-no-monthly">✓ No monthly fees. Ever.</div>
+  </div>
+  <a class="btn-wa" href="https://wa.me/27648244594?text=Hi%20Trek24%2C%20I%27m%20interested%20in%20GPS%20tracking%20for%20my%20vehicle." target="_blank" rel="noopener">
+    <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path class="wa-icon" d="M16 0C7.163 0 0 7.163 0 16c0 2.822.736 5.47 2.027 7.773L0 32l8.47-2.021A15.93 15.93 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm8.32 22.4c-.347.97-1.72 1.78-2.83 2.013-.75.155-1.73.28-5.03-1.08-4.22-1.712-6.94-5.99-7.15-6.27-.21-.28-1.71-2.27-1.71-4.33 0-2.06 1.08-3.07 1.46-3.49.38-.42.83-.53 1.1-.53.28 0 .55.003.79.013.25.01.59-.095.92.7.347.84 1.18 2.9 1.28 3.11.1.21.168.46.033.74-.14.28-.21.455-.42.7-.21.245-.44.547-.63.735-.21.21-.43.435-.185.855.245.42 1.09 1.796 2.34 2.91 1.608 1.437 2.964 1.882 3.38 2.092.42.21.665.175.91-.105.245-.28 1.05-1.225 1.33-1.645.28-.42.56-.35.945-.21.385.14 2.44 1.15 2.86 1.36.42.21.7.315.805.49.1.175.1 1.015-.245 1.985z"/></svg>
+    Get Started on WhatsApp
+  </a>
+  <p class="hero-note">Reply within 1 hour · Harare · Bulawayo · Johannesburg</p>
+</section>
+
+<hr class="div" />
+
+<!-- HOW IT WORKS -->
+<div class="section">
+  <p class="section-eyebrow">How it works</p>
+  <h2 class="section-title">Up and running in 3 steps.</h2>
+  <div class="steps">
+    <div class="step">
+      <span class="step-n">01</span>
+      <div>
+        <h3>Message us on WhatsApp</h3>
+        <p>Tell us how many cars you need tracked. We'll answer every question and send you exact pricing.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-n">02</span>
+      <div>
+        <h3>We come to you</h3>
+        <p>A Trek24 technician installs the GPS unit at your location. Takes under 30 minutes per car.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-n">03</span>
+      <div>
+        <h3>Track live. Forever.</h3>
+        <p>Log in from your phone anywhere, anytime. Real-time location, history, and alerts — no monthly bill.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="div" />
+
+<!-- FEATURES -->
+<div class="section">
+  <p class="section-eyebrow">Why Trek24</p>
+  <h2 class="section-title">Built different. Because monthly fees are a trap.</h2>
+  <div class="features">
+    <div class="feat">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+      <h3>No monthly fees — ever</h3>
+      <p>One payment of $60 per car. No subscriptions, no renewals, no hidden charges.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+      </div>
+      <h3>Real-time GPS tracking</h3>
+      <p>See exactly where your car is right now, from your phone, 24 hours a day.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+      </div>
+      <h3>Works on any phone</h3>
+      <p>No app download needed. Access from your browser on any Android or iPhone.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+      <h3>Instant alerts</h3>
+      <p>Get notified immediately if your car leaves a set area or is moved without permission.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </div>
+      <h3>Full route history</h3>
+      <p>Review every trip your car has made — useful for fleet accountability and driver management.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      </div>
+      <h3>Professional installation</h3>
+      <p>We come to you. Our team installs fast and walks you through the tracking dashboard.</p>
+    </div>
+  </div>
+</div>
+
+<hr class="div" />
+
+<!-- PACKAGES -->
+<div class="section" id="packages">
+  <p class="section-eyebrow">Packages</p>
+  <h2 class="section-title">Choose your plan.</h2>
+
+  <!-- Country toggle for packages -->
+  <div class="country-toggle" style="max-width:340px; margin: 0 auto 32px;">
+    <button class="ctry-btn active" id="pkgZimBtn" onclick="setPkgCountry('zim')">🇿🇼 Zimbabwe</button>
+    <button class="ctry-btn" id="pkgSaBtn" onclick="setPkgCountry('sa')">🇿🇦 South Africa</button>
+  </div>
+
+  <div class="pkg-grid">
+
+    <!-- TREK-LITE -->
+    <div class="pkg-card">
+      <div class="pkg-name">Trek-Lite</div>
+      <div class="pkg-price" id="litePrice">$60 <span>USD</span></div>
+      <div class="pkg-period" id="litePeriod">per car · per year</div>
+      <div class="pkg-tier">Basic Protection</div>
+      <ul class="pkg-list">
+        <li>Real-time GPS Tracking</li>
+        <li>24/7 Monitoring</li>
+        <li>Geofencing Alerts</li>
+        <li>Speed Alerts</li>
+        <li>Movement Alerts</li>
+        <li id="liteHistory">History Playback (7 Days)</li>
+        <li>Mobile App Access</li>
+        <li>Email Alerts</li>
+        <li>Customer Support</li>
+      </ul>
+      <button class="pkg-cta" onclick="bookPackage('Trek-Lite')">Get Trek-Lite →</button>
+    </div>
+
+    <!-- TREK-STANDARD (featured) -->
+    <div class="pkg-card pkg-featured">
+      <div class="pkg-popular">★ Most Popular</div>
+      <div class="pkg-name">Trek-Standard</div>
+      <div class="pkg-price" id="standardPrice">$75 <span>USD</span></div>
+      <div class="pkg-period" id="standardPeriod">per car · per year</div>
+      <div class="pkg-tier" style="color:var(--red);">Premium Protection</div>
+      <ul class="pkg-list">
+        <li>Everything in Trek-Lite</li>
+        <li>Advanced Geo-fencing</li>
+        <li>Instant Theft Alerts</li>
+        <li>Engine On/Off Alerts</li>
+        <li>Tow Away Alerts</li>
+        <li id="standardFuel">Fuel Monitoring</li>
+        <li id="standardBehav">Driver Behaviour Reports</li>
+        <li id="standardHistory">History Playback (30 Days)</li>
+        <li>Priority Support</li>
+        <li id="standardReport">Monthly Performance Report</li>
+      </ul>
+      <button class="pkg-cta pkg-cta-red" onclick="bookPackage('Trek-Standard')">Get Trek-Standard →</button>
+    </div>
+
+    <!-- TREK-PREMIUM -->
+    <div class="pkg-card">
+      <div class="pkg-name">Trek-Premium</div>
+      <div class="pkg-price" id="premiumPrice">$100 <span>USD</span></div>
+      <div class="pkg-period" id="premiumPeriod">per car · per year</div>
+      <div class="pkg-tier">Advanced Protection</div>
+      <ul class="pkg-list">
+        <li>Everything in Trek-Standard</li>
+        <li>Multi-Vehicle Management</li>
+        <li id="premiumBehav">Advanced Driver Behaviour Analytics</li>
+        <li>Maintenance Alerts</li>
+        <li>Battery Disconnect Alerts</li>
+        <li>Custom Reports</li>
+        <li id="premiumApi">API Access</li>
+        <li id="premiumManager">Dedicated Account Manager</li>
+        <li id="premiumHistory">Extended History Playback (90 Days)</li>
+        <li>Priority 24/7 Support</li>
+      </ul>
+      <button class="pkg-cta" onclick="bookPackage('Trek-Premium')">Get Trek-Premium →</button>
+    </div>
+
+  </div>
+</div>
+
+<hr class="div" />
+
+<!-- BOOKING FORM -->
+<div class="section" id="get-started">
+  <p class="section-eyebrow">Get started</p>
+  <h2 class="section-title">Book your installation.</h2>
+  <div class="form-wrap">
+
+    <div class="country-toggle">
+      <button class="ctry-btn active" id="zimBtn" onclick="setCountry('zim')">🇿🇼 Zimbabwe</button>
+      <button class="ctry-btn" id="saBtn" onclick="setCountry('sa')">🇿🇦 South Africa</button>
+    </div>
+
+    <div class="form-field">
+      <label>Your name</label>
+      <input type="text" id="f-name" placeholder="e.g. Takudzwa Moyo" />
+    </div>
+    <div class="form-field">
+      <label>Phone number</label>
+      <input type="tel" id="f-phone" placeholder="e.g. 0772 345 678" />
+    </div>
+    <div class="form-field">
+      <label>City / Location</label>
+      <input type="text" id="f-city" placeholder="e.g. Harare" />
+    </div>
+    <div class="form-field">
+      <label>Number of cars</label>
+      <input type="number" id="f-vehicles" placeholder="e.g. 2" min="1" />
+    </div>
+
+    <!-- Package selector -->
+    <div style="margin-bottom:16px;">
+      <label style="display:block; font-size:12px; font-weight:500; color:var(--muted); margin-bottom:8px; letter-spacing:0.3px; text-transform:uppercase;">Package</label>
+      <div style="display:grid; gap:8px;">
+        <button type="button" class="pkg-sel-btn active" id="sel-lite" onclick="selectPkg('Trek-Lite')">Trek-Lite &nbsp;<span id="sel-lite-price">$60 USD</span></button>
+        <button type="button" class="pkg-sel-btn" id="sel-standard" onclick="selectPkg('Trek-Standard')">Trek-Standard &nbsp;<span id="sel-standard-price">$75 USD</span></button>
+        <button type="button" class="pkg-sel-btn" id="sel-premium" onclick="selectPkg('Trek-Premium')">Trek-Premium &nbsp;<span id="sel-premium-price">$100 USD</span></button>
+      </div>
+    </div>
+
+    <div class="price-display">
+      <div>
+        <div class="pd-label">Selected package</div>
+        <div class="pd-note" id="pd-pkg-name">Trek-Lite · Once-off · no monthly fees</div>
+      </div>
+      <div class="pd-val" id="priceTag">$60 USD</div>
+    </div>
+
+    <button class="btn-red" onclick="submitForm()">
+      Send via WhatsApp →
+    </button>
+    <p style="font-size:12px; color:var(--muted); text-align:center; margin-top:12px;">
+      WhatsApp opens with your details pre-filled. We reply within 1 hour.
+    </p>
+  </div>
+</div>
+
+<!-- FINAL CTA -->
+<div class="final-cta">
+  <h2>One payment. Always on.</h2>
+  <p>Track your fleet for life — no subscriptions, no surprises.</p>
+  <a class="btn-wa" href="https://wa.me/263775594799?text=Hi%20Trek24%2C%20I%27m%20interested%20in%20GPS%20tracking%20for%20my%20fleet." target="_blank" rel="noopener" style="margin: 0 auto;">
+    <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><path class="wa-icon" d="M16 0C7.163 0 0 7.163 0 16c0 2.822.736 5.47 2.027 7.773L0 32l8.47-2.021A15.93 15.93 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm8.32 22.4c-.347.97-1.72 1.78-2.83 2.013-.75.155-1.73.28-5.03-1.08-4.22-1.712-6.94-5.99-7.15-6.27-.21-.28-1.71-2.27-1.71-4.33 0-2.06 1.08-3.07 1.46-3.49.38-.42.83-.53 1.1-.53.28 0 .55.003.79.013.25.01.59-.095.92.7.347.84 1.18 2.9 1.28 3.11.1.21.168.46.033.74-.14.28-.21.455-.42.7-.21.245-.44.547-.63.735-.21.21-.43.435-.185.855.245.42 1.09 1.796 2.34 2.91 1.608 1.437 2.964 1.882 3.38 2.092.42.21.665.175.91-.105.245-.28 1.05-1.225 1.33-1.645.28-.42.56-.35.945-.21.385.14 2.44 1.15 2.86 1.36.42.21.7.315.805.49.1.175.1 1.015-.245 1.985z"/></svg>
+    Chat on WhatsApp
+  </a>
+</div>
+
+<footer>
+  <strong>Trek24</strong> · GPS Car Tracking · Zimbabwe &amp; South Africa<br />
+  <span style="margin-top:6px;display:block;">Smart Tracking. Complete Control.</span>
+</footer>
+
+<script>
+  let country = 'zim';
+  let pkgCountry = 'zim';
+  let selectedPkg = 'Trek-Lite';
+
+  const pkgData = {
+    zim: {
+      'Trek-Lite':     { price: '$60 USD',  period: 'per car · per year' },
+      'Trek-Standard': { price: '$75 USD',  period: 'per car · per year' },
+      'Trek-Premium':  { price: '$100 USD', period: 'per car · per year' }
+    },
+    sa: {
+      'Trek-Lite':     { price: 'R1,200', period: 'per car · per month' },
+      'Trek-Standard': { price: 'R1,800', period: 'per car · per month' },
+      'Trek-Premium':  { price: 'R3,500', period: 'per car · per month' }
+    }
+  };
+
+  const waNumbers = { zim: '263784242424', sa: '27648244594' };
+
+  function setPkgCountry(c) {
+    pkgCountry = c;
+    setCountry(c);
+    document.getElementById('pkgZimBtn').className = 'ctry-btn' + (c==='zim'?' active':'');
+    document.getElementById('pkgSaBtn').className  = 'ctry-btn' + (c==='sa' ?' active':'');
+    const d = pkgData[c];
+    document.getElementById('litePrice').innerHTML     = d['Trek-Lite'].price.replace(/([A-Z$R]+)/, '<span>$1</span> ').trim();
+    document.getElementById('standardPrice').innerHTML = d['Trek-Standard'].price.replace(/([A-Z$R]+)/, '<span>$1</span> ').trim();
+    document.getElementById('premiumPrice').innerHTML  = d['Trek-Premium'].price.replace(/([A-Z$R]+)/, '<span>$1</span> ').trim();
+    document.getElementById('litePeriod').textContent     = d['Trek-Lite'].period;
+    document.getElementById('standardPeriod').textContent = d['Trek-Standard'].period;
+    document.getElementById('premiumPeriod').textContent  = d['Trek-Premium'].period;
+
+    // SA-specific feature differences
+    const isSa = c === 'sa';
+    if(document.getElementById('liteHistory'))     document.getElementById('liteHistory').textContent     = isSa ? 'Movement History (7 Days)' : 'History Playback (7 Days)';
+    if(document.getElementById('standardHistory')) document.getElementById('standardHistory').textContent = isSa ? 'Movement History (90 Days)' : 'History Playback (30 Days)';
+    if(document.getElementById('standardFuel'))    document.getElementById('standardFuel').style.display  = isSa ? 'none' : '';
+    if(document.getElementById('standardReport'))  document.getElementById('standardReport').style.display = isSa ? 'none' : '';
+    if(document.getElementById('premiumHistory'))  document.getElementById('premiumHistory').textContent  = isSa ? 'Movement History (1 Year)' : 'Extended History Playback (90 Days)';
+    if(document.getElementById('premiumApi'))      document.getElementById('premiumApi').style.display    = isSa ? 'none' : '';
+    if(document.getElementById('premiumManager'))  document.getElementById('premiumManager').style.display= isSa ? 'none' : '';
+  }
+
+  function bookPackage(pkg) {
+    document.getElementById('get-started').scrollIntoView({behavior:'smooth'});
+    setTimeout(() => selectPkg(pkg), 400);
+  }
+
+  function setCountry(c) {
+    country = c;
+    document.getElementById('zimBtn').className = 'ctry-btn' + (c==='zim'?' active':'');
+    document.getElementById('saBtn').className  = 'ctry-btn' + (c==='sa' ?' active':'');
+    document.getElementById('pkgZimBtn').className = 'ctry-btn' + (c==='zim'?' active':'');
+    document.getElementById('pkgSaBtn').className  = 'ctry-btn' + (c==='sa' ?' active':'');
+    updateFormPrices(c);
+  }
+
+  function updateFormPrices(c) {
+    document.getElementById('sel-lite-price').textContent     = pkgData[c]['Trek-Lite'].price;
+    document.getElementById('sel-standard-price').textContent = pkgData[c]['Trek-Standard'].price;
+    document.getElementById('sel-premium-price').textContent  = pkgData[c]['Trek-Premium'].price;
+    document.getElementById('priceTag').textContent = pkgData[c][selectedPkg].price;
+    document.getElementById('pd-pkg-name').textContent = selectedPkg + ' · Once-off · no monthly fees';
+  }
+
+  function selectPkg(pkg) {
+    selectedPkg = pkg;
+    ['Trek-Lite','Trek-Standard','Trek-Premium'].forEach(p => {
+      const id = 'sel-' + p.toLowerCase().replace('-','');
+      if(document.getElementById(id)) document.getElementById(id).className = 'pkg-sel-btn' + (p===pkg?' active':'');
+    });
+    document.getElementById('priceTag').textContent = pkgData[country][pkg].price;
+    document.getElementById('pd-pkg-name').textContent = pkg + ' · Once-off · no monthly fees';
+  }
+
+  function submitForm() {
+    const name     = document.getElementById('f-name').value.trim();
+    const phone    = document.getElementById('f-phone').value.trim();
+    const city     = document.getElementById('f-city').value.trim();
+    const vehicles = document.getElementById('f-vehicles').value.trim();
+    const price    = pkgData[country][selectedPkg].price;
+    const cLabel   = country === 'zim' ? 'Zimbabwe' : 'South Africa';
+    const num      = waNumbers[country];
+
+    const msg = `Hi Trek24! I'd like to book a GPS tracker installation.\n\n` +
+      `Name: ${name || 'N/A'}\n` +
+      `Phone: ${phone || 'N/A'}\n` +
+      `Location: ${city || 'N/A'}\n` +
+      `Cars: ${vehicles || 'N/A'}\n` +
+      `Country: ${cLabel}\n` +
+      `Package: ${selectedPkg} (${price})\n\n` +
+      `Please confirm availability. Thank you!`;
+
+    window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+</script>
+</body>
+</html>
